@@ -292,19 +292,21 @@ app.post('/signup', (req, res)=>{
 });
 
 
-
 app.post('/login', (req, res)=>{
+    console.log(req.body)
     let user: User = req.body.user;
-    connection.query("SELECT * FROM user WHERE Email=? AND Password=?",[user.Email, user.Password],
+    connection.query("SELECT * FROM user WHERE 	Email=? AND Password=?",[req.body.user.Email, req.body.user.Password],
                                 (err, result)=>{
                                     if(err){
                                         console.log(err.message);
                                         res.json({"error":2});
+                                        // console.log(result,"dfjkdf");
                                     }
                                     else{
                                         if (result.length>0){
-                                            res.send('Welcome ' + user.Email)
                                             const token = generateAuthToken(user);
+                                            res.json({"token":
+                                            token})
                                             res.header("x-auth-token", token).send({
                                                 _id: user.id,
                                                 email: user.Email,
@@ -312,13 +314,15 @@ app.post('/login', (req, res)=>{
                                             });
                                         }
                                         else{
-                                            res.json({"Access Denid":true})
+                                            res.json({"Access Denid":true,"result":result})
+                                            
                                         }
 
                                     }
                                 })
 
 });
+
 
 
 
