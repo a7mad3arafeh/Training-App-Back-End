@@ -224,7 +224,8 @@ app.post("/signup", (req, res) => {
                 res.send("You are already registered");
             }
             else {
-                dbconnect_1.connection.query(`INSERT INTO user (Email, Password) VALUES ('${user.Email}','${user.Password}')`, (err, result) => {
+                dbconnect_1.connection.query(`INSERT INTO user (Email, Password, UserName, Role) 
+            VALUES ('${user.Email}','${user.Password}','${user.UserName}','${user.Role}')`, (err, result) => {
                     if (err) {
                         console.log("Error registering new user " + err);
                         res.send("Error registering new user");
@@ -254,7 +255,7 @@ app.post("/login", (req, res) => {
                 res.json({ token: token });
                 res.header("x-auth-token", token).send({
                     _id: user.id,
-                    email: user.Email,
+                    Email: user.Email,
                 });
             }
             else {
@@ -329,8 +330,8 @@ app.post("/trainee", (req, res) => {
 app.post("/trainer", (req, res) => {
     let trainer = req.body.trainer;
     dbconnect_1.connection.query(`
-    INSERT INTO trainer (UserName, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
-    ('${trainer.Username}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
+    INSERT INTO trainer (UserName, Email, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
+    ('${trainer.Username}', '${trainer.Email}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
     `, (err, result) => {
         if (err) {
             console.log("Error " + err);

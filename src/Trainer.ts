@@ -1,6 +1,7 @@
 export default class Trainer{
     id: number;
     Username: string;
+    Email:string
     Password: string;
     FName: string;
     LName: string;

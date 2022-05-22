@@ -5,7 +5,7 @@ import path from "path";
 import { connection, handleDisconnect } from "./dbconnect";
 import bodyparser from "body-parser";
 import cors from "cors";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
 import { logHello } from "./middleware/myMiddleware";
 import User from "./User";
 import { generateAuthToken } from "./middleware/auth";
@@ -250,7 +250,8 @@ app.post("/signup", (req, res) => {
           res.send("You are already registered");
         } else {
           connection.query(
-            `INSERT INTO user (Email, Password) VALUES ('${user.Email}','${user.Password}')`,
+            `INSERT INTO user (Email, Password, UserName, Role) 
+            VALUES ('${user.Email}','${user.Password}','${user.UserName}','${user.Role}')`,
             (err, result) => {
               if (err) {
                 console.log("Error registering new user " + err);
@@ -285,7 +286,7 @@ app.post("/login", (req, res) => {
           res.json({ token: token });
           res.header("x-auth-token", token).send({
             _id: user.id,
-            email: user.Email,
+            Email: user.Email,
           });
         } else {
           res.json({ "Access Denid": true, result: result });
@@ -374,8 +375,8 @@ app.post("/trainer", (req, res) => {
   let trainer: Trainer = req.body.trainer;
   connection.query(
     `
-    INSERT INTO trainer (UserName, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
-    ('${trainer.Username}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
+    INSERT INTO trainer (UserName, Email, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
+    ('${trainer.Username}', '${trainer.Email}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
     `,
     (err, result) => {
       if (err) {
