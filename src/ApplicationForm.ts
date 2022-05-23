@@ -15,6 +15,7 @@ export default class ApplicaionForm {
   HoursAvailable: string;
   ReqTrainingHours: number;
   SupervisorPhoneNo: number;
+  Emailsup: string;
   UniversityDoc: string;
-  CVC: string;
+  // CVC: string;
 }

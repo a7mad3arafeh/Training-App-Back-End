@@ -162,6 +162,18 @@ app.get("/trainer", (req, res) => {
   });
 });
 
+app.get("/employee", (req, res) => {
+  console.log("inside the get '/employee' route");
+  connection.query("SELECT * FROM employee", (err, result) => {
+    if (err) {
+      console.log("query error: " + err);
+      res.json({ Error: err });
+    } else {
+      res.json(result);
+    }
+  });
+});
+
 app.get("/trainer/:id", (req, res) => {
   let id = req.params["id"];
   connection.query("SELECT * FROM trainer WHERE id=?", id, (err, result) => {
@@ -300,8 +312,8 @@ app.post("/appform", (req, res) => {
   let appform: ApplicaionForm = req.body.appform;
   connection.query(
     `
-    INSERT INTO applicationform (FName, LName, PhoneNo, StudentID, Addres, Email, university, Field, ExpectedDOGrad, TotalAvg, TypeOfTraining, DaysAvailable, HoursAvailable, ReqTrainingHours, SupervisorPhoneNo, UniversityDoc, CVC) VALUES
-    ('${appform.FName}', '${appform.LName}', '${appform.PhoneNo}', '${appform.StudentID}', '${appform.Addres}', '${appform.Email}', '${appform.university}', '${appform.Field}', '${appform.ExpectedDOGrad}', '${appform.TotalAvg}', '${appform.TypeOfTraining}', '${appform.DaysAvailable}', '${appform.HoursAvailable}', '${appform.ReqTrainingHours}', '${appform.SupervisorPhoneNo}', '${appform.UniversityDoc}', '${appform.CVC}');
+    INSERT INTO applicationform (FName, LName, PhoneNo, StudentID, Addres, Email, university, Field, ExpectedDOGrad, TotalAvg, TypeOfTraining, DaysAvailable, HoursAvailable, ReqTrainingHours, SupervisorPhoneNo, UniversityDoc, Emailsup) VALUES
+    ('${appform.FName}', '${appform.LName}', '${appform.PhoneNo}', '${appform.StudentID}', '${appform.Addres}', '${appform.Email}', '${appform.university}', '${appform.Field}', '${appform.ExpectedDOGrad}', '${appform.TotalAvg}', '${appform.TypeOfTraining}', '${appform.DaysAvailable}', '${appform.HoursAvailable}', '${appform.ReqTrainingHours}', '${appform.SupervisorPhoneNo}' , '${appform.UniversityDoc}', '${appform.Emailsup}');
     `,
     (err, result) => {
       if (err) {
