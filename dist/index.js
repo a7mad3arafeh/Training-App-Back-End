@@ -12,6 +12,9 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const cors_1 = __importDefault(require("cors"));
 const auth_1 = require("./middleware/auth");
 const port = 3000;
+let crypto = require('crypto');
+var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
+var key = 'May We Meet again';
 let app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use((0, morgan_1.default)("common", {
@@ -223,10 +226,26 @@ app.get("/user/:id", (req, res) => {
 // *****************
 // Router post
 // *****************
+//Encrypting text
+function encrypt(text) {
+    var cipher = crypto.createCipher(algorithm, key);
+    var encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
+    return encrypted;
+}
+;
+function decrypt(encrypted) {
+    var decipher = crypto.createDecipher(algorithm, key);
+    var decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
+    return decrypted;
+}
+;
 app.post("/signup", (req, res) => {
-    const user = req.body.user;
+    const user = req.body;
+    console.log(user);
+    let newpass = encrypt(user.Password);
     // user.Password = bcrypt.hash(user.Password, 10);
-    dbconnect_1.connection.query("SELECT * FROM user WHERE Email=?", [user.Email], (err, result) => {
+    console.log(user.Password);
+    dbconnect_1.connection.query("SELECT * FROM user WHERE Email=? and Password", [user.Email, ''], (err, result) => {
         if (err) {
             console.log(err.message);
             res.json({ error: 2 });
@@ -237,7 +256,7 @@ app.post("/signup", (req, res) => {
             }
             else {
                 dbconnect_1.connection.query(`INSERT INTO user (Email, Password, UserName, Role) 
-            VALUES ('${user.Email}','${user.Password}','${user.UserName}','${user.Role}')`, (err, result) => {
+            VALUES ('${user.Email}','${newpass}','${user.UserName}','${user.Role}')`, (err, result) => {
                     if (err) {
                         console.log("Error registering new user " + err);
                         res.send("Error registering new user");
@@ -254,8 +273,10 @@ app.post("/signup", (req, res) => {
     });
 });
 app.post("/login", (req, res) => {
-    let user = req.body.user;
-    dbconnect_1.connection.query("SELECT * FROM user WHERE 	Email=? AND Password=?", [req.body.user.Email, req.body.user.Password], (err, result) => {
+    let user = req.body;
+    console.log(user);
+    user.Password = encrypt(user.Password);
+    dbconnect_1.connection.query("SELECT * FROM user WHERE 	Email=? AND Password=?", [user.Email, user.Password], (err, result) => {
         if (err) {
             console.log(err.message);
             res.json({ error: 2 });
@@ -264,11 +285,18 @@ app.post("/login", (req, res) => {
         else {
             if (result.length > 0) {
                 const token = (0, auth_1.generateAuthToken)(user);
-                res.json({ token: token });
-                res.header("x-auth-token", token).send({
-                    _id: user.id,
-                    Email: user.Email,
-                });
+                let usRes = result[0];
+                console.log(usRes);
+                console.log(usRes);
+                res.json({ token: token,
+                    _id: usRes.ID,
+                    Email: usRes.Email,
+                    Role: usRes.Role });
+                // res.header("x-auth-token", token).json({
+                //   _id: user.id,
+                //   Email: user.Email,
+                //   Role:user.Role
+                // });
             }
             else {
                 res.json({ "Access Denid": true, result: result });

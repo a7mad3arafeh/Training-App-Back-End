@@ -1,5 +1,6 @@
 export default class Trainer{
     id: number;
+    ProfilePic:Blob;
     Username: string;
     Email:string
     Password: string;
