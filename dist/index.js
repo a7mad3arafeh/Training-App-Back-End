@@ -255,8 +255,8 @@ app.post("/signup", (req, res) => {
                 res.send("You are already registered");
             }
             else {
-                dbconnect_1.connection.query(`INSERT INTO user (Email, Password, UserName, Role) 
-            VALUES ('${user.Email}','${newpass}','${user.UserName}','${user.Role}')`, (err, result) => {
+                dbconnect_1.connection.query(`INSERT INTO user (Email, Password, Role) 
+            VALUES ('${user.Email}','${newpass}','${user.Role}')`, (err, result) => {
                     if (err) {
                         console.log("Error registering new user " + err);
                         res.send("Error registering new user");
@@ -354,8 +354,8 @@ app.post("/tasklist", (req, res) => {
 app.post("/trainee", (req, res) => {
     let trainee = req.body.trainee;
     dbconnect_1.connection.query(`
-    INSERT INTO trainee (UserName, Password, FName, LName, SupervisorID, DOB, TrainingHours, TaskListID) VALUES
-    ('${trainee.Username}', '${trainee.Password}', '${trainee.FName}', '${trainee.LName}', '${trainee.SupervisorID}', '${trainee.DOB}', '${trainee.TrainingHours}', '${trainee.TaskListID}');
+    INSERT INTO trainee (ProfilePic, Email, Major, Password, DOB, TrainingHours) VALUES
+    ('${trainee.ProfilePic}', '${trainee.Email}', '${trainee.Major}', '${trainee.Password}',  '${trainee.DOB}', '${trainee.TrainingHours}');
     `, (err, result) => {
         if (err) {
             console.log("Error " + err);
