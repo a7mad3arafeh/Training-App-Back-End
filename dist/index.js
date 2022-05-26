@@ -16,6 +16,7 @@ let crypto = require('crypto');
 var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
 var key = 'May We Meet again';
 let app = (0, express_1.default)();
+let HoursStatus = 1;
 app.use((0, cors_1.default)());
 app.use((0, morgan_1.default)("common", {
     stream: fs_1.default.createWriteStream(path_1.default.join(__dirname, "../access.log"), {
@@ -110,16 +111,18 @@ app.get("/tasklist/:id", (req, res) => {
     });
 });
 app.get("/trainee", (req, res) => {
-    console.log("inside the get '/Trainee' route");
-    dbconnect_1.connection.query("SELECT * FROM trainee", (err, result) => {
-        if (err) {
-            console.log("query error: " + err);
-            res.json({ Error: err });
-        }
-        else {
-            res.json(result);
-        }
-    });
+    if (HoursStatus = 1) {
+        console.log("inside the get '/Trainee' route");
+        dbconnect_1.connection.query("SELECT * FROM trainee", (err, result) => {
+            if (err) {
+                console.log("query error: " + err);
+                res.json({ Error: err });
+            }
+            else {
+                res.json(result);
+            }
+        });
+    }
 });
 app.get("/trainee/:id", (req, res) => {
     let id = req.params["id"];

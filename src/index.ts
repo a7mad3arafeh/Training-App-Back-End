@@ -20,6 +20,7 @@ let crypto = require('crypto');
 var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
 var key = 'May We Meet again';
 let app = express();
+let HoursStatus=1;
 
 app.use(cors());
 
@@ -128,7 +129,8 @@ app.get("/tasklist/:id", (req, res) => {
 });
 
 app.get("/trainee", (req, res) => {
-  console.log("inside the get '/Trainee' route");
+  if(HoursStatus=1){
+    console.log("inside the get '/Trainee' route");
   connection.query("SELECT * FROM trainee", (err, result) => {
     if (err) {
       console.log("query error: " + err);
@@ -137,6 +139,8 @@ app.get("/trainee", (req, res) => {
       res.json(result);
     }
   });
+  }
+  
 });
 
 app.get("/trainee/:id", (req, res) => {

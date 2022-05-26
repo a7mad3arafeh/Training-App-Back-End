@@ -6,4 +6,6 @@ export default class Trainee{
     Password: string;
     DOB: string;
     TrainingHours: number; 
+    HoursStatus: number;
+    PhoneNo	: number;
 }
