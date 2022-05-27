@@ -17,6 +17,9 @@ var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
 var key = 'May We Meet again';
 let app = (0, express_1.default)();
 let HoursStatus = 1;
+// const bodyParser  = require("body-parser")
+// const multer = require ('multer');
+// let upload=multer({dest:'uploads/'})
 app.use((0, cors_1.default)());
 app.use((0, morgan_1.default)("common", {
     stream: fs_1.default.createWriteStream(path_1.default.join(__dirname, "../access.log"), {

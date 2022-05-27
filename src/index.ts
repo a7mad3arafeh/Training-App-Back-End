@@ -21,6 +21,10 @@ var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
 var key = 'May We Meet again';
 let app = express();
 let HoursStatus=1;
+// const bodyParser  = require("body-parser")
+// const multer = require ('multer');
+
+// let upload=multer({dest:'uploads/'})
 
 app.use(cors());
 
