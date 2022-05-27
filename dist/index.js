@@ -242,7 +242,77 @@ function decrypt(encrypted) {
     return decrypted;
 }
 ;
+// app.post("/signup", (req, res) => {
+//   const user: User = req.body;
+//   console.log(user);
+//   let newpass=encrypt(user.Password);
+//   // user.Password = bcrypt.hash(user.Password, 10);
+//   console.log(user.Password);
+//   connection.query(
+//     "SELECT * FROM user WHERE Email=? and Password",
+//     [user.Email,''],
+//     (err, result) => {
+//       if (err) {
+//         console.log(err.message);
+//         res.json({ error: 2 });
+//       } else {
+//         if (result.length > 0) {
+//           res.send("You are already registered");
+//         } else {
+//           connection.query(
+//             `INSERT INTO user (Email, Password, Role) 
+//             VALUES ('${user.Email}','${newpass}','${user.Role}')`,
+//             (err, result) => {
+//               if (err) {
+//                 console.log("Error registering new user " + err);
+//                 res.send("Error registering new user");
+//               } else {
+//                 const token = generateAuthToken(user);
+//                 res.header("x-auth-token", token).json({
+//                   Email: user.Email,
+//                 });
+//               }
+//             }
+//           );
+//         }
+//       }
+//     }
+//   );
+// });
 app.post("/signup", (req, res) => {
+    const user = req.body;
+    console.log(user);
+    // let newpass=encrypt(user.Password);
+    // user.Password = bcrypt.hash(user.Password, 10);
+    // console.log(user.Password);
+    dbconnect_1.connection.query("SELECT * FROM user WHERE Email=?", [user.Email], (err, result) => {
+        if (err) {
+            console.log(err.message);
+            res.json({ error: 2 });
+        }
+        else {
+            if (result.length > 0) {
+                res.send("This email already registered");
+            }
+            else {
+                dbconnect_1.connection.query(`INSERT INTO user (Email, Password, UserName, Role) 
+            VALUES ('${user.Email}','','${user.UserName}','${user.Role}')`, (err, result) => {
+                    if (err) {
+                        console.log("Error registering new user " + err);
+                        res.send("Error registering new user");
+                    }
+                    else {
+                        const token = (0, auth_1.generateAuthToken)(user);
+                        res.header("x-auth-token", token).json({
+                            Email: user.Email,
+                        });
+                    }
+                });
+            }
+        }
+    });
+});
+app.post("/signupPass", (req, res) => {
     const user = req.body;
     console.log(user);
     let newpass = encrypt(user.Password);
@@ -255,11 +325,10 @@ app.post("/signup", (req, res) => {
         }
         else {
             if (result.length > 0) {
-                res.send("You are already registered");
-            }
-            else {
-                dbconnect_1.connection.query(`INSERT INTO user (Email, Password, Role) 
-            VALUES ('${user.Email}','${newpass}','${user.Role}')`, (err, result) => {
+                res.send("You can signup");
+                dbconnect_1.connection.query(`UPDATE user SET 
+            Password='${newpass}', 
+            UserName='${user.UserName}'`, (err, result) => {
                     if (err) {
                         console.log("Error registering new user " + err);
                         res.send("Error registering new user");
@@ -271,6 +340,10 @@ app.post("/signup", (req, res) => {
                         });
                     }
                 });
+            }
+            else {
+                res.send("You don't have email from admin");
+                res.json({ "Access Denid": true, result: result });
             }
         }
     });
