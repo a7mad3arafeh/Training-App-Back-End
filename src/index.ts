@@ -55,7 +55,7 @@ app.get("/home", (req, res) => {
 
 app.get("/appform", (req, res) => {
   console.log("inside the get '/Application Form' route");
-  connection.query("SELECT * FROM applicationform", (err, result) => {
+  connection.query("SELECT * FROM applicationform ORDER BY ID DESC", (err, result) => {
     if (err) {
       console.log("query error: " + err);
       res.json({ Error: err });
@@ -263,11 +263,11 @@ function encrypt(text: string) {
   return encrypted;
 };
 
-function decrypt(encrypted: any) {
-  var decipher = crypto.createDecipher(algorithm, key);
-  var decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
-  return decrypted;
-};
+// function decrypt(encrypted: any) {
+//   var decipher = crypto.createDecipher(algorithm, key);
+//   var decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
+//   return decrypted;
+// };
 
 // app.post("/signup", (req, res) => {
 //   const user: User = req.body;
@@ -309,15 +309,17 @@ function decrypt(encrypted: any) {
 //   );
 // });
 
-app.post("/signup", (req, res) => {
-  const user: User = req.body;
-  console.log(user);
+app.post("/postdatauserandtranee", (req, res) => {
+  const fr: ApplicaionForm = req.body;
+
+  // const user: User = req.body;
+  // console.log(user);
   // let newpass=encrypt(user.Password);
   // user.Password = bcrypt.hash(user.Password, 10);
   // console.log(user.Password);
   connection.query(
     "SELECT * FROM user WHERE Email=?",
-    [user.Email],
+    [fr.Email],
     (err, result) => {
       if (err) {
         console.log(err.message);
@@ -329,16 +331,51 @@ app.post("/signup", (req, res) => {
 
           connection.query(
             `INSERT INTO user (Email, Password, UserName, Role) 
-            VALUES ('${user.Email}','','${user.UserName}','${user.Role}')`,
+            VALUES ('${fr.Email}','','','2'),('${fr.Emailsup}','','','3')`,
             (err, result) => {
               if (err) {
-                console.log("Error registering new user " + err);
                 res.send("Error registering new user");
               } else {
-                const token = generateAuthToken(user);
-                res.header("x-auth-token", token).json({
-                  Email: user.Email,
-                });
+
+                connection.query(
+                  `
+                  INSERT INTO unitrainingsupervisor (UserName, Password, SupervisorName, UniName, PhoneNo,Email) VALUES
+                  ('', '','Elayan', '${fr.university}', '${fr.PhoneNo}','${fr.Emailsup}');
+                  `,
+                  (err, result) => {
+                    if (err) {
+                      console.log("Error " + err);
+                      res.json({ Error: err });
+                    } else {
+                      console.log(result);
+                      let gettedSupervisorID:number=result['insertId'];
+                      connection.query(
+                        `
+                        INSERT INTO trainee (Email, Major, Password, DOB, TrainingHours,SupervisorID) VALUES
+                        ('${fr.Email}', '${fr.Field}', '',  '${fr.ExpectedDOGrad}', '${fr.ReqTrainingHours}',${gettedSupervisorID});
+                        `,
+                        (err, result) => {
+                          if (err) {
+                            console.log("Error " + err);
+                            res.json({ Error: err });
+                          } else {
+                            res.json({ Created: result });
+                          }
+                        }
+                      );
+                      // res.json({ Created: result });
+                    }
+                  }
+                );
+
+
+
+
+               
+                // const token = generateAuthToken(user);
+                // res.header("x-auth-token", token).json({
+                //   Email: user.Email,
+                // });
               }
             }
           );
@@ -356,7 +393,7 @@ app.post("/signupPass", (req, res) => {
   console.log(user.Password);
   
   connection.query(
-    "SELECT * FROM user WHERE Email=? and Password",
+    "SELECT * FROM user WHERE Email=? and Password=?",
     [user.Email,''],
     (err, result) => {
       if (err) {
@@ -364,15 +401,15 @@ app.post("/signupPass", (req, res) => {
         res.json({ error: 2 });
       } else {
         if (result.length > 0) {
-          res.send("You can signup");
+          // res.send("You can signup");
           connection.query(
             `UPDATE user SET 
-            Password='${newpass}', 
-            UserName='${user.UserName}'`,
+            Password='${newpass}' WHERE Email=? and Password=?`,
+            [user.Email,''],
             (err, result) => {
               if (err) {
                 console.log("Error registering new user " + err);
-                res.send("Error registering new user");
+                res.json({message:"Error registering new user"});
               } else {
                 const token = generateAuthToken(user);
                 res.header("x-auth-token", token).json({
@@ -382,7 +419,7 @@ app.post("/signupPass", (req, res) => {
             }
           );
         } else {
-          res.send("You don't have email from admin");
+          // res.send("You don't have email from admin");
           res.json({ "Access Denid": true, result: result });
 
         }
@@ -394,6 +431,7 @@ app.post("/signupPass", (req, res) => {
 app.post("/login", (req, res) => {
   let user: User = req.body;
   console.log(user);
+  console.log("_______________________");
   user.Password=encrypt(user.Password);
   connection.query(
     "SELECT * FROM user WHERE 	Email=? AND Password=?",
