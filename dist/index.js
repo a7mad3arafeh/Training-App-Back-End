@@ -116,7 +116,7 @@ app.get("/tasklist/:id", (req, res) => {
 app.get("/trainee", (req, res) => {
     if (HoursStatus = 1) {
         console.log("inside the get '/Trainee' route");
-        dbconnect_1.connection.query("SELECT * FROM trainee", (err, result) => {
+        dbconnect_1.connection.query("SELECT * FROM trainee ", (err, result) => {
             if (err) {
                 console.log("query error: " + err);
                 res.json({ Error: err });
@@ -191,16 +191,42 @@ app.get("/unitrainingsupervisor", (req, res) => {
         }
     });
 });
-app.get("/unitrainingsupervisor/:id", (req, res) => {
-    let id = req.params["id"];
-    dbconnect_1.connection.query("SELECT * FROM unitrainingsupervisor WHERE id=?", id, (err, result) => {
+app.get("/unitrainingsupervisor/:Email", (req, res) => {
+    let id = req.params["Email"];
+    console.log(id);
+    dbconnect_1.connection.query("SELECT * FROM unitrainingsupervisor WHERE Email=?", [id], (err, result) => {
         if (err) {
             console.log("Error: " + err);
             res.json({ Error: err });
-            res.send("There is Uni. training supervisor yet!!");
+            // res.send("There is Uni. training supervisor yet!!");
         }
         else {
             res.json(result);
+        }
+    });
+});
+app.get("/gettraineebysuper/:email", (req, res) => {
+    let id = req.params["email"];
+    dbconnect_1.connection.query("SELECT ID FROM unitrainingsupervisor WHERE email=?", [id], (err, result) => {
+        if (err) {
+            console.log("Error: " + err);
+            res.json({ Error: err });
+            // res.send("There is Uni. training supervisor yet!!");
+        }
+        else {
+            console.log(result[0]['ID']);
+            let id = result[0]['ID'];
+            // res.json(result);
+            dbconnect_1.connection.query("SELECT * FROM trainee WHERE SupervisorID=? ", [id], (err, result) => {
+                if (err) {
+                    console.log("query error: " + err);
+                    res.json({ Error: err });
+                }
+                else {
+                    console.log(res);
+                    res.json(result);
+                }
+            });
         }
     });
 });
@@ -472,17 +498,77 @@ app.post("/trainee", (req, res) => {
 });
 // Error
 app.post("/trainer", (req, res) => {
+    // const fr: Emp = req.body;
     let trainer = req.body.trainer;
-    dbconnect_1.connection.query(`
-    INSERT INTO trainer (UserName, Email, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
-    ('${trainer.Username}', '${trainer.Email}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
-    `, (err, result) => {
+    // connection.query(
+    //   `
+    //   INSERT INTO trainer (UserName, Email, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
+    //   ('${trainer.Username}', '${trainer.Email}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
+    //   `,
+    //   (err, result) => {
+    //     if (err) {
+    //       console.log("Error " + err);
+    //       res.json({ Error: err });
+    //     } else {
+    //       res.json({ Created: result });
+    //     }
+    //   }
+    // );
+    const fr = req.body;
+    // const user: User = req.body;
+    // console.log(user);
+    // let newpass=encrypt(user.Password);
+    // user.Password = bcrypt.hash(user.Password, 10);
+    // console.log(user.Password);
+    dbconnect_1.connection.query("SELECT * FROM user WHERE Email=?", [fr.Email], (err, result) => {
         if (err) {
-            console.log("Error " + err);
-            res.json({ Error: err });
+            console.log(err.message);
+            res.json({ error: 2 });
         }
         else {
-            res.json({ Created: result });
+            if (result.length > 0) {
+                res.send("This email already registered");
+            }
+            else {
+                dbconnect_1.connection.query(`INSERT INTO user (Email, Password, UserName, Role) 
+            VALUES ('${fr.Email}','','','2'),('${fr.Emailsup}','','','3')`, (err, result) => {
+                    if (err) {
+                        res.send("Error registering new user");
+                    }
+                    else {
+                        dbconnect_1.connection.query(`
+                  INSERT INTO unitrainingsupervisor (UserName, Password, SupervisorName, UniName, PhoneNo,Email) VALUES
+                  ('', '','Elayan', '${fr.university}', '${fr.PhoneNo}','${fr.Emailsup}');
+                  `, (err, result) => {
+                            if (err) {
+                                console.log("Error " + err);
+                                res.json({ Error: err });
+                            }
+                            else {
+                                console.log(result);
+                                let gettedSupervisorID = result['insertId'];
+                                dbconnect_1.connection.query(`
+                        INSERT INTO trainee (Email, Major, Password, DOB, TrainingHours,SupervisorID) VALUES
+                        ('${fr.Email}', '${fr.Field}', '',  '${fr.ExpectedDOGrad}', '${fr.ReqTrainingHours}',${gettedSupervisorID});
+                        `, (err, result) => {
+                                    if (err) {
+                                        console.log("Error " + err);
+                                        res.json({ Error: err });
+                                    }
+                                    else {
+                                        res.json({ Created: result });
+                                    }
+                                });
+                                // res.json({ Created: result });
+                            }
+                        });
+                        // const token = generateAuthToken(user);
+                        // res.header("x-auth-token", token).json({
+                        //   Email: user.Email,
+                        // });
+                    }
+                });
+            }
         }
     });
 });

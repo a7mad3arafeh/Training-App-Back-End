@@ -4,4 +4,5 @@ export default class User{
     Password:string;
     UserName:string
     Role: string;
+    Status:string;
 }
