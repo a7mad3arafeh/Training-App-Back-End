@@ -152,6 +152,20 @@ app.get("/trainer", (req, res) => {
         }
     });
 });
+app.get("/trainer/:Email", (req, res) => {
+    let id = req.params["Email"];
+    console.log(id);
+    dbconnect_1.connection.query("SELECT * FROM trainer WHERE Email=?", [id], (err, result) => {
+        if (err) {
+            console.log("Error: " + err);
+            res.json({ Error: err });
+            // res.send("There is Uni. training supervisor yet!!");
+        }
+        else {
+            res.json(result);
+        }
+    });
+});
 app.get("/employee", (req, res) => {
     console.log("inside the get '/employee' route");
     dbconnect_1.connection.query("SELECT * FROM employee", (err, result) => {
