@@ -15,6 +15,7 @@ import TasksList from "./TasksList";
 import Trainee from "./Trainee";
 import University from "./University";
 import Trainer from "./Trainer";
+import Employee from "./Employee";
 const port: number = 3000;
 let crypto = require('crypto');
 var algorithm = 'aes256'; // or any other algorithm supported by OpenSSL
@@ -172,8 +173,8 @@ app.get("/trainer", (req, res) => {
   });
 });
 
-app.get("/trainer/:Email", (req, res) => {
-  let id = req.params["Email"];
+app.get("/trainer/:email", (req, res) => {
+  let id = req.params["email"];
   console.log(id);
   connection.query(
     "SELECT * FROM trainer WHERE Email=?",
@@ -383,11 +384,11 @@ app.post("/postdatauserandtranee", (req, res) => {
               if (err) {
                 res.send("Error registering new user");
               } else {
-
+                console.log("data");
                 connection.query(
                   `
                   INSERT INTO unitrainingsupervisor (UserName, Password, SupervisorName, UniName, PhoneNo,Email) VALUES
-                  ('', '','Elayan', '${fr.university}', '${fr.PhoneNo}','${fr.Emailsup}');
+                  ('', '','Elayan', '${fr.university}', '${fr.SupervisorPhoneNo}','${fr.Emailsup}');
                   `,
                   (err, result) => {
                     if (err) {
@@ -398,8 +399,8 @@ app.post("/postdatauserandtranee", (req, res) => {
                       let gettedSupervisorID:number=result['insertId'];
                       connection.query(
                         `
-                        INSERT INTO trainee (Email, Major, Password, DOB, TrainingHours,SupervisorID) VALUES
-                        ('${fr.Email}', '${fr.Field}', '',  '${fr.ExpectedDOGrad}', '${fr.ReqTrainingHours}',${gettedSupervisorID});
+                        INSERT INTO trainee (FName, LName, Email, Major, Password, DOB, TrainingHours,SupervisorID) VALUES
+                        ('${fr.FName}','${fr.LName}','${fr.Email}', '${fr.Field}', '',  '${fr.ExpectedDOGrad}', '${fr.ReqTrainingHours}',${gettedSupervisorID});
                         `,
                         (err, result) => {
                           if (err) {
@@ -587,31 +588,13 @@ app.post("/trainee", (req, res) => {
   );
 });
 
-// Error
 app.post("/trainer", (req, res) => {
   // const fr: Emp = req.body;
-  let trainer: Trainer = req.body.trainer;
-  // connection.query(
-  //   `
-  //   INSERT INTO trainer (UserName, Email, Password, FName, LName, PhoneNo, TaskListID, TraineeID, Department) VALUES
-  //   ('${trainer.Username}', '${trainer.Email}', '${trainer.Password}', '${trainer.FName}','${trainer.LName}', '${trainer.PhoneNo}', '${trainer.TaskListID}', '${trainer.TraineeID}', '${trainer.Department}');
-  //   `,
-  //   (err, result) => {
-  //     if (err) {
-  //       console.log("Error " + err);
-  //       res.json({ Error: err });
-  //     } else {
-  //       res.json({ Created: result });
-  //     }
-  //   }
-  // );
-  const fr: ApplicaionForm = req.body;
+  // let trainer: Employee = req.body.employee;
 
-  // const user: User = req.body;
-  // console.log(user);
-  // let newpass=encrypt(user.Password);
-  // user.Password = bcrypt.hash(user.Password, 10);
-  // console.log(user.Password);
+  const fr: Employee = req.body;
+
+
   connection.query(
     "SELECT * FROM user WHERE Email=?",
     [fr.Email],
@@ -626,7 +609,7 @@ app.post("/trainer", (req, res) => {
 
           connection.query(
             `INSERT INTO user (Email, Password, UserName, Role) 
-            VALUES ('${fr.Email}','','','2'),('${fr.Emailsup}','','','3')`,
+            VALUES ('${fr.Email}','','','1')`,
             (err, result) => {
               if (err) {
                 res.send("Error registering new user");
@@ -634,43 +617,20 @@ app.post("/trainer", (req, res) => {
 
                 connection.query(
                   `
-                  INSERT INTO unitrainingsupervisor (UserName, Password, SupervisorName, UniName, PhoneNo,Email) VALUES
-                  ('', '','Elayan', '${fr.university}', '${fr.PhoneNo}','${fr.Emailsup}');
+                  INSERT INTO trainer (UserName,Email, Password, FName, LName, PhoneNo,Department) VALUES
+                  ('', '${fr.Email}','', '${fr.FName}', '${fr.LName}','${fr.PhoneNo}','${fr.Department}');
                   `,
                   (err, result) => {
                     if (err) {
                       console.log("Error " + err);
                       res.json({ Error: err });
                     } else {
-                      console.log(result);
-                      let gettedSupervisorID:number=result['insertId'];
-                      connection.query(
-                        `
-                        INSERT INTO trainee (Email, Major, Password, DOB, TrainingHours,SupervisorID) VALUES
-                        ('${fr.Email}', '${fr.Field}', '',  '${fr.ExpectedDOGrad}', '${fr.ReqTrainingHours}',${gettedSupervisorID});
-                        `,
-                        (err, result) => {
-                          if (err) {
-                            console.log("Error " + err);
-                            res.json({ Error: err });
-                          } else {
-                            res.json({ Created: result });
-                          }
-                        }
-                      );
-                      // res.json({ Created: result });
+                      res.send("Error registering new user");
+
                     }
                   }
                 );
 
-
-
-
-               
-                // const token = generateAuthToken(user);
-                // res.header("x-auth-token", token).json({
-                //   Email: user.Email,
-                // });
               }
             }
           );
@@ -680,23 +640,6 @@ app.post("/trainer", (req, res) => {
   );
 });
 
-app.post("/unitrainingsupervisor", (req, res) => {
-  let unitrainingsupervisor: University = req.body.unitrainingsupervisor;
-  connection.query(
-    `
-    INSERT INTO unitrainingsupervisor (UserName, Password, SupervisorName, UniName, PhoneNo, TraineeID) VALUES
-    ('${unitrainingsupervisor.Username}', '${unitrainingsupervisor.Password}', '${unitrainingsupervisor.SupName}','${unitrainingsupervisor.UniName}', '${unitrainingsupervisor.PhoneNo}', '${unitrainingsupervisor.TraineeID}');
-    `,
-    (err, result) => {
-      if (err) {
-        console.log("Error " + err);
-        res.json({ Error: err });
-      } else {
-        res.json({ Created: result });
-      }
-    }
-  );
-});
 
 // *****************
 // Router put

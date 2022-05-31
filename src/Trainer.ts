@@ -1,7 +1,7 @@
 export default class Trainer{
     id: number;
     ProfilePic:Blob;
-    Username: string;
+    UserName: string;
     Email:string
     Password: string;
     FName: string;
